@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hacker News Scraper</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            text-align: center;
+            background-color: #f5f5f5;
+        }
+        h2 {
+            color: #ff6600;
+            margin-bottom: 30px;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+            text-align: left;
+        }
+        li {
+            margin: 15px 0;
+            padding: 15px;
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        li:hover {
+            transform: translateY(-2px);
+        }
+        a {
+            text-decoration: none;
+            color: #2a2a2a;
+            font-size: 16px;
+        }
+        a:hover {
+            color: #ff6600;
+        }
+        #loading {
+            color: #666;
+            font-style: italic;
+        }
+        .error-message {
+            color: #dc3545;
+            padding: 15px;
+            background-color: #fff;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <h2>Hacker News Latest Articles</h2>
+    <ul id="articles-list"><li id="loading">Načítání článků...</li></ul>
+
+    <script>
+        async function fetchArticles() {
+            try {
+                console.log("Začínám načítat články...");
+                // Použijeme CORS proxy pro vyhnutí se CORS problémům
+                const corsProxy = "https://cors-anywhere.herokuapp.com/";
+                const apiUrl = "https://fastapi-scraper-beuh.onrender.com/scrape-hn";
+                
+                const response = await fetch(corsProxy + apiUrl, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Origin': window.location.origin
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                console.log("Získaná data:", data);
+
+                if (!data.articles || data.articles.length === 0) {
+                    document.getElementById("articles-list").innerHTML = 
+                        `<li class="error-message">Žádné články k zobrazení</li>`;
+                    return;
+                }
+
+                let output = "";
+                data.articles.forEach((article, index) => {
+                    output += `
+                        <li>
+                            <a href="${article.link}" target="_blank">
+                                ${index + 1}. ${article.title}
+                            </a>
+                        </li>`;
+                });
+
+                document.getElementById("articles-list").innerHTML = output;
+            } catch (error) {
+                console.error("Detailní chyba:", error);
+                document.getElementById("articles-list").innerHTML = 
+                    `<li class="error-message">Chyba při načítání článků: ${error.message}</li>`;
+            }
+        }
+
+        // První načtení při otevření stránky
+        fetchArticles();
+
+        // Automatická aktualizace každých 5 minut
+        setInterval(fetchArticles, 300000);
+    </script>
+</body>
+</html>
