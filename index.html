@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hacker News Scraper</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            text-align: center;
+        }
+        h2 {
+            color: #333;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+        li {
+            margin: 10px 0;
+            font-size: 18px;
+        }
+        a {
+            text-decoration: none;
+            color: #007bff;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Hacker News Latest Articles</h2>
+    <ul id="articles-list">Loading...</ul>
+
+    <script>
+        async function fetchArticles() {
+            try {
+                const response = await fetch("https://fastapi-scraper-beuh.onrender.com/scrape-hn");
+                const data = await response.json();
+                
+                let output = "";
+                data.articles.forEach(article => {
+                    output += `<li><a href="${article.link}" target="_blank">${article.title}</a></li>`;
+                });
+
+                document.getElementById("articles-list").innerHTML = output;
+            } catch (error) {
+                document.getElementById("articles-list").innerHTML = "<li>Failed to load articles. Try again later.</li>";
+                console.error("Error fetching articles:", error);
+            }
+        }
+
+        fetchArticles();
+    </script>
+
+</body>
+</html>
